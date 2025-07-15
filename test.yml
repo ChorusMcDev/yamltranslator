@@ -1,0 +1,15 @@
+server:
+  name: "Test Server"
+  description: "This is a test server for YAML translation"
+  port: 8080
+  enabled: true
+
+messages:
+  welcome: "Welcome to our server!"
+  goodbye: "Thank you for visiting!"
+  error: "An error occurred: {error}"
+
+features:
+  translation: true
+  formatting: true
+  small_caps: false
