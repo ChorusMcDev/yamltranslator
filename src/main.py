@@ -45,7 +45,7 @@ def check_dependencies():
 def show_banner():
     """Display application banner."""
     print("╔" + "═" * 70 + "╗")
-    print("║" + " " * 20 + "🔧 YAML Translator Tool v1.0 🔧" + " " * 19 + "║")
+    print("║" + " " * 20 + "🔧 YAML Translator Tool v1.0.1 🔧" + " " * 19 + "║")
     print("║" + " " * 70 + "║")
     print("║" + " " * 10 + "🌐 Translate • 🔤 Format • 🔄 Reverse • ⚙️ Configure" + " " * 11 + "║")
     print("╚" + "═" * 70 + "╝")
