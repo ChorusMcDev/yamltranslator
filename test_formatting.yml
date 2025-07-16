@@ -1,0 +1,6 @@
+test:
+  message: "Hello World\nThis is a new line"
+  colored: "<#FF0000>Red text</#>"
+  numbered: "<1>Item one</1>"
+  mixed: "Welcome {player}\nYour color is <#00FF00>green</#>"
+  placeholder: "%player_name% has joined\nServer status: &aOnline"

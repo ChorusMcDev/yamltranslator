@@ -38,25 +38,42 @@ def unflatten_yaml(d):
     return result
 
 def to_small_caps(text):
-    """Convert text to small caps, preserving placeholders and special characters."""
+    """Convert text to small caps, preserving placeholders, newlines, and color codes."""
     if not isinstance(text, str):
         return text
     
-    # Preserve placeholders and formatting codes
-    placeholder_pattern = r'(%[^%]*%|\{[^}]*\}|&[a-zA-Z0-9])'
+    # Preserve placeholders, newlines, color codes, and any XML-like tags
+    placeholder_pattern = r'(%[^%]*%|\{[^}]*\}|&[a-zA-Z0-9]|\\n|<[^>]*>)'
     placeholders = []
     temp_text = text
     
-    # Extract placeholders
+    # Extract placeholders, newlines, and color codes
     for match in re.finditer(placeholder_pattern, text):
         placeholder = f"__PLACEHOLDER_{len(placeholders)}__"
         placeholders.append(match.group())
         temp_text = temp_text.replace(match.group(), placeholder, 1)
     
-    # Convert to small caps
+    # Convert to small caps (but keep placeholder markers unchanged)
     result = ""
-    for char in temp_text:
-        result += SMALL_CAPS_MAP.get(char.lower(), char)
+    i = 0
+    while i < len(temp_text):
+        # Check if we're at a placeholder marker
+        if temp_text[i:].startswith("__PLACEHOLDER_"):
+            # Find the end of the placeholder marker
+            end_marker = temp_text.find("__", i + 14)
+            if end_marker != -1:
+                # Keep the placeholder marker as-is
+                placeholder_marker = temp_text[i:end_marker + 2]
+                result += placeholder_marker
+                i = end_marker + 2
+            else:
+                # Convert single character
+                result += SMALL_CAPS_MAP.get(temp_text[i].lower(), temp_text[i])
+                i += 1
+        else:
+            # Convert single character
+            result += SMALL_CAPS_MAP.get(temp_text[i].lower(), temp_text[i])
+            i += 1
     
     # Restore placeholders
     for i, placeholder_text in enumerate(placeholders):

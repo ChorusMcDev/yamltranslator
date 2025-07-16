@@ -5,6 +5,30 @@ All notable changes to the YAML Translator Tool will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-07-16
+
+### Enhanced
+- 🎯 **Improved Small Caps Formatting Preservation**: Enhanced the placeholder preservation system to support ANY XML-like tags
+- 🏷️ **Universal Tag Support**: Now preserves all `<tag>` and `<tag:value>` patterns instead of specific hardcoded ones
+- 🎮 **Gaming Format Support**: Better support for Minecraft and gaming formatting codes like `<shift:-8>`, `<glyph:skills_gui>`, `<#color>` etc.
+- 🔧 **Simplified Regex Pattern**: Changed from multiple specific patterns to a single universal `<[^>]*>` pattern
+
+### Fixed
+- 🐛 **Formatter Module**: Fixed placeholder preservation to handle any custom XML-like tags
+- 🔄 **Reverser Module**: Updated reversal logic to match the improved formatting preservation
+- 📝 **Pattern Matching**: Eliminated duplicate pattern definitions and improved consistency
+
+### Technical Improvements
+- **Regex Pattern**: Updated from `<#[^>]*>|<[0-9]+>|<shift:[^>]*>|<glyph:[^>]*>` to universal `<[^>]*>`
+- **Test Coverage**: Added comprehensive test suite with 18+ test cases covering various tag formats
+- **Round-trip Testing**: Verified that all formatting elements survive conversion to small caps and back
+- **Future-proof Design**: New pattern automatically supports any future XML-like tag formats
+
+### Developer Experience
+- 🧪 **Enhanced Testing**: Added `test_all_tags.py` with comprehensive formatting preservation tests
+- 📚 **Documentation**: Updated Copilot instructions for improved AI-assisted development
+- 🔍 **Pattern Analysis**: Better understanding of formatting preservation requirements
+
 ## [1.0.0] - 2025-07-15
 
 ### Added

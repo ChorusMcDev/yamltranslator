@@ -251,7 +251,7 @@ class Translator:
                     resp = self.client.chat.completions.create(
                         model=self.settings['model'],
                         messages=[
-                            {"role": "system", "content": f"Translate these texts to {lang}. Keep ALL placeholders like {{value}}, {{player}}, &7, &a, %placeholders% EXACTLY as they are. Return only the translated text in numbered format."},
+                            {"role": "system", "content": f"Translate these texts to {lang}. Keep ALL placeholders like {{value}}, {{player}}, &7, &a, %placeholders%, \\n, <#RRGGBB> EXACTLY as they are. Do not change newlines (\\n), hex colors (<#RRGGBB>), or any formatting codes. Return only the translated text in numbered format."},
                             {"role": "user", "content": prompt}
                         ],
                         timeout=self.settings['timeout']
