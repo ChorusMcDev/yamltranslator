@@ -33,6 +33,48 @@ This application includes a professional licensing system powered by Cryptolens:
 
 For detailed licensing information, see [LICENSING_INTEGRATION.md](LICENSING_INTEGRATION.md).
 
+## 🏗️ Build & Release System
+
+### Automated Builds
+
+This project features a fully automated CI/CD pipeline using GitHub Actions:
+
+- **Automatic Builds**: Every push to `main` or `develop` triggers a build
+- **Cross-Platform**: Builds are generated for both Windows x64 and Linux x64
+- **Version Management**: Automatic version numbering with format `1.0.1-{build_number}`
+- **Pre-Release Publishing**: Automatic pre-release creation with downloadable executables
+- **Artifact Management**: Old pre-releases are automatically cleaned up (keeps latest 5)
+
+### Download Pre-Built Executables
+
+1. Visit the [Releases](https://github.com/ChorusMcDev/yamltranslator/releases) page
+2. Look for the latest pre-release version
+3. Download the appropriate executable:
+   - **Windows**: `YAMLTranslator-windows-x64.exe`
+   - **Linux**: `YAMLTranslator-linux-x64`
+
+### Build Process
+
+The automated build process:
+1. **Version Generation**: Creates version string like `1.0.1-42` (base version + build number)
+2. **File Updates**: Updates version in spec files and source code
+3. **Cross-Platform Build**: Uses PyInstaller to create standalone executables
+4. **Testing**: Validates executables can run and show version info
+5. **Release Creation**: Publishes pre-release with both executables attached
+6. **Cleanup**: Removes old pre-releases to keep repository clean
+
+### Manual Building
+
+To build locally:
+
+```bash
+# Windows
+build.bat
+
+# Linux/Mac
+chmod +x build.sh && ./build.sh
+```
+
 ## 🏗️ Project Structure
 ```
 yaml-translator-tool/

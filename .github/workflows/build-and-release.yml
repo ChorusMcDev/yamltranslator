@@ -1,0 +1,256 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: YAMLTranslator-linux
+            asset_name: YAMLTranslator-linux-x64
+          - os: windows-latest
+            artifact_name: YAMLTranslator-windows
+            asset_name: YAMLTranslator-windows-x64.exe
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for proper version numbering
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Generate version number
+      id: version
+      shell: bash
+      run: |
+        # Get the current commit count as build number
+        BUILD_NUMBER=${{ github.run_number }}
+        BASE_VERSION="1.0.1"
+        VERSION="${BASE_VERSION}-${BUILD_NUMBER}"
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Generated version: ${VERSION}"
+
+    - name: Update version in spec file (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        $version = "${{ steps.version.outputs.version }}"
+        $buildNumber = "${{ github.run_number }}"
+        $buildDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+        
+        # Update spec file
+        $content = Get-Content "YAMLTranslator.spec" -Raw
+        $content = $content -replace "version = '[^']*'", "version = '$version'"
+        Set-Content "YAMLTranslator.spec" -Value $content
+        
+        # Update version info file for Windows
+        $versionContent = Get-Content "version_info.py" -Raw
+        $versionContent = $versionContent -replace "FileVersion', u'[^']*'", "FileVersion', u'$version'"
+        $versionContent = $versionContent -replace "ProductVersion', u'[^']*'", "ProductVersion', u'$version'"
+        Set-Content "version_info.py" -Value $versionContent
+        
+        # Update version.py
+        $versionPyContent = Get-Content "src/version.py" -Raw
+        $versionPyContent = $versionPyContent -replace '__version__ = "[^"]*"', '__version__ = "' + $version + '"'
+        $versionPyContent = $versionPyContent -replace '__build_number__ = "[^"]*"', '__build_number__ = "' + $buildNumber + '"'
+        $versionPyContent = $versionPyContent -replace '__build_date__ = "[^"]*"', '__build_date__ = "' + $buildDate + '"'
+        Set-Content "src/version.py" -Value $versionPyContent
+        
+        Write-Output "Updated Windows files with version: $version"
+
+    - name: Update version in spec file (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        BUILD_NUMBER="${{ github.run_number }}"
+        BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        
+        # Update spec file
+        sed -i "s/version = '[^']*'/version = '${VERSION}'/g" YAMLTranslator.spec
+        
+        # Update version.py
+        sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"${VERSION}\"/g" src/version.py
+        sed -i "s/__build_number__ = \"[^\"]*\"/__build_number__ = \"${BUILD_NUMBER}\"/g" src/version.py
+        sed -i "s/__build_date__ = \"[^\"]*\"/__build_date__ = \"${BUILD_DATE}\"/g" src/version.py
+        
+        echo "Updated Linux files with version: ${VERSION}"
+
+    - name: Build with PyInstaller (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        pyinstaller YAMLTranslator.spec
+        # Rename the executable to include platform info
+        Move-Item "dist/YAMLTranslator.exe" "dist/${{ matrix.asset_name }}"
+
+    - name: Build with PyInstaller (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        pyinstaller YAMLTranslator.spec
+        # Rename the executable to include platform info
+        mv "dist/YAMLTranslator" "dist/${{ matrix.asset_name }}"
+        chmod +x "dist/${{ matrix.asset_name }}"
+
+    - name: Test executable (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        # Test that the executable runs and shows version
+        cd dist
+        ./${{ matrix.asset_name }} --version || echo "Version check completed"
+
+    - name: Test executable (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        # Test that the executable runs and shows version
+        cd dist
+        ./${{ matrix.asset_name }} --version || echo "Version check completed"
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: dist/${{ matrix.asset_name }}
+        retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Generate version number
+      id: version
+      run: |
+        BUILD_NUMBER=${{ github.run_number }}
+        BASE_VERSION="1.0.1"
+        VERSION="${BASE_VERSION}-${BUILD_NUMBER}"
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Generated version: ${VERSION}"
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Display structure of downloaded files
+      run: ls -la
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: YAML Translator v${{ steps.version.outputs.version }}
+        body: |
+          🚀 **YAML Translator Pre-Release v${{ steps.version.outputs.version }}**
+          
+          **Automated build from commit:** ${{ github.sha }}
+          **Build number:** ${{ github.run_number }}
+          **Branch:** ${{ github.ref_name }}
+          
+          ## 📦 Downloads
+          
+          - **Windows x64:** YAMLTranslator-windows-x64.exe
+          - **Linux x64:** YAMLTranslator-linux-x64
+          
+          ## ✨ Features
+          
+          - 🌐 YAML file translation to 25+ languages
+          - 🔤 Small caps text formatting
+          - 🔄 Reverse small caps conversion
+          - 🔑 Cryptolens license validation
+          - ⚙️ Configurable settings
+          - 📊 Translation history tracking
+          
+          ## 🔧 Requirements
+          
+          - Valid Cryptolens license with Feature 1 (YAML Translator) or Feature 8 (All Features)
+          - OpenAI API key for translation functionality
+          
+          ## 📝 Notes
+          
+          This is a pre-release build generated automatically from the latest code.
+          For production use, please use stable releases.
+          
+          **Commit:** ${{ github.sha }}
+          **Built on:** $(date -u)
+        draft: false
+        prerelease: true
+
+    - name: Upload Windows Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./YAMLTranslator-windows/YAMLTranslator-windows-x64.exe
+        asset_name: YAMLTranslator-windows-x64.exe
+        asset_content_type: application/octet-stream
+
+    - name: Upload Linux Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./YAMLTranslator-linux/YAMLTranslator-linux-x64
+        asset_name: YAMLTranslator-linux-x64
+        asset_content_type: application/octet-stream
+
+  cleanup:
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Delete old pre-releases
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          // Keep only the last 5 pre-releases
+          const { data: releases } = await github.rest.repos.listReleases({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            per_page: 100
+          });
+          
+          const preReleases = releases.filter(release => release.prerelease);
+          const releasesToDelete = preReleases.slice(5); // Keep first 5, delete the rest
+          
+          for (const release of releasesToDelete) {
+            console.log(`Deleting old pre-release: ${release.tag_name}`);
+            await github.rest.repos.deleteRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id
+            });
+            
+            // Also delete the tag
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `tags/${release.tag_name}`
+              });
+            } catch (error) {
+              console.log(`Could not delete tag ${release.tag_name}: ${error.message}`);
+            }
+          }

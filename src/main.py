@@ -49,8 +49,14 @@ def check_dependencies():
 
 def show_banner():
     """Display application banner."""
+    try:
+        from version import get_version
+        version = get_version()
+    except ImportError:
+        version = "1.0.1"
+    
     print("╔" + "═" * 70 + "╗")
-    print("║" + " " * 20 + "🔧 YAML Translator Tool v1.0.1 🔧" + " " * 19 + "║")
+    print("║" + f" " * 20 + f"🔧 YAML Translator Tool v{version} 🔧" + " " * (49 - len(version)) + "║")
     print("║" + " " * 70 + "║")
     print("║" + " " * 10 + "🌐 Translate • 🔤 Format • 🔄 Reverse • ⚙️ Configure" + " " * 11 + "║")
     print("╚" + "═" * 70 + "╝")
@@ -103,6 +109,23 @@ def check_license_status():
 
 def main():
     """Main application entry point."""
+    # Handle command line arguments
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ['--version', '-v']:
+            try:
+                from version import print_version
+                print_version()
+            except ImportError:
+                print("YAML Translator Tool v1.0.1")
+            return
+        elif sys.argv[1] in ['--help', '-h']:
+            print("YAML Translator Tool")
+            print("Usage:")
+            print("  YAMLTranslator            - Start interactive mode")
+            print("  YAMLTranslator --version  - Show version information")
+            print("  YAMLTranslator --help     - Show this help message")
+            return
+    
     try:
         # Initialize the application
         initialize_app()
