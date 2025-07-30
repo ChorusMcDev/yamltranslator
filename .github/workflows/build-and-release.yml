@@ -54,23 +54,47 @@ jobs:
         $buildNumber = "${{ github.run_number }}"
         $buildDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
         
+        # Debug: Check current directory and files
+        Write-Output "Current directory: $(Get-Location)"
+        Write-Output "Files in current directory:"
+        Get-ChildItem
+        Write-Output "Looking for YAMLTranslator.spec..."
+        Get-ChildItem -Recurse -Name "YAMLTranslator.spec"
+        
         # Update spec file
-        $content = Get-Content "YAMLTranslator.spec" -Raw
-        $content = $content -replace "version = '[^']*'", "version = '$version'"
-        Set-Content "YAMLTranslator.spec" -Value $content
+        if (Test-Path "YAMLTranslator.spec") {
+          $content = Get-Content "YAMLTranslator.spec" -Raw
+          $content = $content -replace "version = '[^']*'", "version = '$version'"
+          Set-Content "YAMLTranslator.spec" -Value $content
+          Write-Output "Updated YAMLTranslator.spec"
+        } else {
+          Write-Output "ERROR: YAMLTranslator.spec not found!"
+          exit 1
+        }
         
         # Update version info file for Windows
-        $versionContent = Get-Content "version_info.py" -Raw
-        $versionContent = $versionContent -replace "FileVersion', u'[^']*'", "FileVersion', u'$version'"
-        $versionContent = $versionContent -replace "ProductVersion', u'[^']*'", "ProductVersion', u'$version'"
-        Set-Content "version_info.py" -Value $versionContent
+        if (Test-Path "version_info.py") {
+          $versionContent = Get-Content "version_info.py" -Raw
+          $versionContent = $versionContent -replace "FileVersion', u'[^']*'", "FileVersion', u'$version'"
+          $versionContent = $versionContent -replace "ProductVersion', u'[^']*'", "ProductVersion', u'$version'"
+          Set-Content "version_info.py" -Value $versionContent
+          Write-Output "Updated version_info.py"
+        } else {
+          Write-Output "WARNING: version_info.py not found, skipping"
+        }
         
         # Update version.py
-        $versionPyContent = Get-Content "src/version.py" -Raw
-        $versionPyContent = $versionPyContent -replace '__version__ = "[^"]*"', '__version__ = "' + $version + '"'
-        $versionPyContent = $versionPyContent -replace '__build_number__ = "[^"]*"', '__build_number__ = "' + $buildNumber + '"'
-        $versionPyContent = $versionPyContent -replace '__build_date__ = "[^"]*"', '__build_date__ = "' + $buildDate + '"'
-        Set-Content "src/version.py" -Value $versionPyContent
+        if (Test-Path "src/version.py") {
+          $versionPyContent = Get-Content "src/version.py" -Raw
+          $versionPyContent = $versionPyContent -replace '__version__ = "[^"]*"', '__version__ = "' + $version + '"'
+          $versionPyContent = $versionPyContent -replace '__build_number__ = "[^"]*"', '__build_number__ = "' + $buildNumber + '"'
+          $versionPyContent = $versionPyContent -replace '__build_date__ = "[^"]*"', '__build_date__ = "' + $buildDate + '"'
+          Set-Content "src/version.py" -Value $versionPyContent
+          Write-Output "Updated src/version.py"
+        } else {
+          Write-Output "ERROR: src/version.py not found!"
+          exit 1
+        }
         
         Write-Output "Updated Windows files with version: $version"
 
@@ -81,13 +105,32 @@ jobs:
         BUILD_NUMBER="${{ github.run_number }}"
         BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
         
+        # Debug: Check current directory and files
+        echo "Current directory: $(pwd)"
+        echo "Files in current directory:"
+        ls -la
+        echo "Looking for YAMLTranslator.spec..."
+        find . -name "YAMLTranslator.spec" -type f
+        
         # Update spec file
-        sed -i "s/version = '[^']*'/version = '${VERSION}'/g" YAMLTranslator.spec
+        if [ -f "YAMLTranslator.spec" ]; then
+          sed -i "s/version = '[^']*'/version = '${VERSION}'/g" YAMLTranslator.spec
+          echo "Updated YAMLTranslator.spec"
+        else
+          echo "ERROR: YAMLTranslator.spec not found!"
+          exit 1
+        fi
         
         # Update version.py
-        sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"${VERSION}\"/g" src/version.py
-        sed -i "s/__build_number__ = \"[^\"]*\"/__build_number__ = \"${BUILD_NUMBER}\"/g" src/version.py
-        sed -i "s/__build_date__ = \"[^\"]*\"/__build_date__ = \"${BUILD_DATE}\"/g" src/version.py
+        if [ -f "src/version.py" ]; then
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"${VERSION}\"/g" src/version.py
+          sed -i "s/__build_number__ = \"[^\"]*\"/__build_number__ = \"${BUILD_NUMBER}\"/g" src/version.py
+          sed -i "s/__build_date__ = \"[^\"]*\"/__build_date__ = \"${BUILD_DATE}\"/g" src/version.py
+          echo "Updated src/version.py"
+        else
+          echo "ERROR: src/version.py not found!"
+          exit 1
+        fi
         
         echo "Updated Linux files with version: ${VERSION}"
 
