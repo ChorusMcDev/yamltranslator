@@ -3,7 +3,7 @@ Version information for YAML Translator Tool
 This file is automatically updated during the build process
 """
 
-__version__ = "1.0.1-dev"
+__version__ = "1.0.2-dev"
 __build_number__ = "0"
 __build_date__ = "Unknown"
 

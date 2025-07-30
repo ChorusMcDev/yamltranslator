@@ -53,7 +53,7 @@ def show_banner():
         from version import get_version
         version = get_version()
     except ImportError:
-        version = "1.0.1"
+        version = "1.0.2"
     
     print("╔" + "═" * 70 + "╗")
     print("║" + f" " * 20 + f"🔧 YAML Translator Tool v{version} 🔧" + " " * (49 - len(version)) + "║")
