@@ -17,6 +17,7 @@ def display_main_menu():
     print("║  3. 🔄 Reverse Small Caps to Normal Text              ║")
     print("║  4. ⚙️  Settings & Configuration                       ║")
     print("║  5. 📊 View Translation History                       ║")
+    print("║  6. 🔑 License Management                             ║")
     print("║  0. 🚪 Exit                                           ║")
     print("╚" + "═" * 60 + "╝")
 
@@ -136,6 +137,8 @@ def handle_menu_selection(choice):
         handle_settings()
     elif choice == '5':
         handle_history()
+    elif choice == '6':
+        handle_license_management()
     elif choice == '0':
         print("\n👋 Thank you for using YAML Translator Tool!")
         sys.exit(0)
@@ -143,8 +146,55 @@ def handle_menu_selection(choice):
         print("❌ Invalid choice. Please try again.")
         input("\n⏸️  Press Enter to continue...")
 
+def check_license_for_feature(feature_name):
+    """Check if user has valid license for a specific feature."""
+    try:
+        from license_system.license_manager import get_license_manager
+        
+        manager = get_license_manager()
+        
+        # Check if license has required features
+        has_features, message = manager.has_required_features()
+        
+        if not has_features:
+            print(f"\n🔒 License Required for {feature_name.title()}")
+            print("=" * 50)
+            print(message)
+            print()
+            
+            if "No license key found" in message:
+                choice = input("❓ Would you like to enter your license key now? (y/n): ").strip().lower()
+                if choice in ['y', 'yes']:
+                    from licensing.license_menu import enter_license_key
+                    return enter_license_key()
+                else:
+                    print("💡 You can manage your license from the main menu (option 6)")
+                    return False
+            else:
+                print("� Your license is valid but missing required features:")
+                print("   • Feature 1 (F1): YAML Translator")
+                print("   • Feature 8 (F8): All Features")
+                print()
+                print("� To upgrade your license:")
+                print("   📧 Email: support@yamltranslator.com")
+                print("   🌐 Website: https://yamltranslator.com")
+                return False
+        
+        return True
+                
+    except ImportError:
+        print("⚠️  License system not available - feature available in trial mode")
+        return True
+    except Exception as e:
+        print(f"⚠️  License check error: {e} - allowing access")
+        return True
+
 def handle_translation():
     """Handle translation workflow."""
+    # Check license first
+    if not check_license_for_feature("translation"):
+        return
+    
     try:
         from core.translator import Translator
     except ImportError:
@@ -182,6 +232,10 @@ def handle_translation():
 
 def handle_formatting():
     """Handle small caps formatting workflow."""
+    # Check license first  
+    if not check_license_for_feature("formatting"):
+        return
+        
     try:
         from core.formatter import Formatter
     except ImportError:
@@ -207,6 +261,10 @@ def handle_formatting():
 
 def handle_reversing():
     """Handle reverse formatting workflow."""
+    # Check license first
+    if not check_license_for_feature("reversing"):
+        return
+        
     try:
         from core.reverser import Reverser
     except ImportError:
@@ -444,6 +502,19 @@ def handle_history():
             print(f"   📊 Status: {entry.get('status', 'Unknown')}")
     
     input("\n⏸️  Press Enter to return to main menu...")
+
+def handle_license_management():
+    """Handle license management workflow."""
+    try:
+        from license_system.license_menu import license_menu
+        license_menu()
+    except ImportError:
+        print("❌ License management not available.")
+        print("💡 Please ensure the licensing module is properly installed.")
+        input("\n⏸️  Press Enter to continue...")
+    except Exception as e:
+        print(f"❌ Error accessing license management: {e}")
+        input("\n⏸️  Press Enter to continue...")
 
 def main_menu():
     """Main menu loop."""

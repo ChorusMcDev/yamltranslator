@@ -32,6 +32,11 @@ def check_dependencies():
     except ImportError:
         missing_deps.append("more-itertools")
     
+    try:
+        import licensing
+    except ImportError:
+        missing_deps.append("licensing")
+    
     if missing_deps:
         print("❌ Missing required dependencies:")
         for dep in missing_deps:
@@ -69,8 +74,32 @@ def initialize_app():
     except ImportError:
         print("⚠️  Configuration system not available (using defaults)")
     
+    # Check license status
+    print("🔑 Checking license...")
+    license_valid = check_license_status()
+    
+    if not license_valid:
+        print("⚠️  License check failed or no license found")
+        # You can choose to allow trial mode or require license
+        # For now, we'll show a warning but continue
+        print("💡 Some features may be limited without a valid license")
+    else:
+        print("✅ License verified successfully!")
+    
     print("\n🚀 Starting YAML Translator Tool...")
     input("\n⏸️  Press Enter to continue...")
+
+def check_license_status():
+    """Check license status during application startup."""
+    try:
+        from license_system.license_menu import quick_license_check
+        return quick_license_check()
+    except ImportError:
+        print("⚠️  License system not available")
+        return False
+    except Exception as e:
+        print(f"⚠️  License check error: {e}")
+        return False
 
 def main():
     """Main application entry point."""

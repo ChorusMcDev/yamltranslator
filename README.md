@@ -1,4 +1,4 @@
-# YAML Translator Tool v1.0
+# YAML Translator Tool v1.0.1
 
 ## 🎯 Overview
 The YAML Translator Tool is a comprehensive, user-friendly application designed to facilitate the translation and formatting of YAML configuration files. It provides functionalities to translate text, convert text to small caps, and reverse text values while preserving placeholders and special formatting. This tool is particularly useful for developers and system administrators who work with YAML files and need to manage localization or formatting tasks efficiently.
@@ -7,12 +7,31 @@ The YAML Translator Tool is a comprehensive, user-friendly application designed 
 - **🌐 AI-Powered Translation**: Translate YAML files into 25+ languages using OpenAI's GPT models
 - **🔤 Smart Formatting**: Convert text values to small caps while preserving placeholders and color codes
 - **🔄 Intelligent Reversing**: Convert small caps back to normal text
+- **🔑 Professional Licensing**: Secure Cryptolens-based license management system
 - **⚙️ Configurable Settings**: Customize API settings, file handling, and UI preferences
 - **📊 Detailed Telemetry**: Track performance with comprehensive batch and timing information
 - **💾 History Tracking**: Keep track of all translations and operations
 - **🔐 Secure API Key Storage**: Encrypted storage of OpenAI API keys
 - **📁 Flexible File Selection**: Multiple ways to select and process files
 - **🎨 Beautiful UI**: Enhanced console interface with emojis and colors
+
+## 🔑 Licensing System
+
+This application includes a professional licensing system powered by Cryptolens:
+
+- **Secure License Validation**: Server-side validation with RSA signature verification
+- **Machine Binding**: Licenses are tied to specific device identifiers
+- **Feature Protection**: Core features require valid license activation
+- **License Management**: Built-in license management interface (Menu Option 6)
+
+### Getting Your License
+
+1. **Purchase**: Visit [yamltranslator.com](https://yamltranslator.com) to purchase a license
+2. **Machine Code**: Use the application to get your unique machine code
+3. **Activation**: Enter your license key through the License Management menu
+4. **Verification**: The system automatically validates your license online
+
+For detailed licensing information, see [LICENSING_INTEGRATION.md](LICENSING_INTEGRATION.md).
 
 ## 🏗️ Project Structure
 ```
@@ -28,13 +47,18 @@ yaml-translator-tool/
 │   │   ├── __init__.py        # Package initialization
 │   │   ├── menu.py            # 🎨 Enhanced menu and user interface
 │   │   └── telemetry.py       # 📊 Performance tracking and logging
-│   └── config/
+│   ├── config/
+│   │   ├── __init__.py        # Package initialization
+│   │   └── settings.py        # ⚙️ Configuration and settings management
+│   └── license_system/        # 🔑 Licensing system
 │       ├── __init__.py        # Package initialization
-│       └── settings.py        # ⚙️ Configuration and settings management
+│       ├── license_manager.py # License validation and management
+│       └── license_menu.py    # Interactive license interface
 ├── requirements.txt           # 📦 Project dependencies
 ├── YAMLTranslator.spec        # 🔧 PyInstaller build configuration
 ├── build.bat                  # 🪟 Windows build script
 ├── build.sh                   # 🐧 Linux/Mac build script
+├── LICENSING_INTEGRATION.md   # 🔑 Licensing documentation
 └── README.md                  # 📖 Project documentation
 ```
 
