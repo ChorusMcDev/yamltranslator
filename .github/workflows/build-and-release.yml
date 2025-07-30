@@ -65,11 +65,11 @@ jobs:
         $versionContent = $versionContent -replace "ProductVersion', u'[^']*'", "ProductVersion', u'$version'"
         Set-Content "version_info.py" -Value $versionContent
         
-        # Update version.py
+        # Update version.py - escape the quotes properly
         $versionPyContent = Get-Content "src/version.py" -Raw
-        $versionPyContent = $versionPyContent -replace '__version__ = "[^"]*"', '__version__ = "' + $version + '"'
-        $versionPyContent = $versionPyContent -replace '__build_number__ = "[^"]*"', '__build_number__ = "' + $buildNumber + '"'
-        $versionPyContent = $versionPyContent -replace '__build_date__ = "[^"]*"', '__build_date__ = "' + $buildDate + '"'
+        $versionPyContent = $versionPyContent -replace '__version__ = "[^"]*"', "__version__ = `"$version`""
+        $versionPyContent = $versionPyContent -replace '__build_number__ = "[^"]*"', "__build_number__ = `"$buildNumber`""
+        $versionPyContent = $versionPyContent -replace '__build_date__ = "[^"]*"', "__build_date__ = `"$buildDate`""
         Set-Content "src/version.py" -Value $versionPyContent
         
         Write-Output "Updated Windows files with version: $version"
