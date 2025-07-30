@@ -6,7 +6,7 @@ from pathlib import Path
 
 # Build configuration
 app_name = 'YAMLTranslator'
-version = '1.0.1-dev'  # This will be updated by GitHub Actions
+version = '1.0.2-dev'  # This will be updated by GitHub Actions
 main_script = 'src/main.py'
 icon_file = None  # Can be added later if needed
 
