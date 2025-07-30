@@ -165,7 +165,7 @@ def check_license_for_feature(feature_name):
             if "No license key found" in message:
                 choice = input("❓ Would you like to enter your license key now? (y/n): ").strip().lower()
                 if choice in ['y', 'yes']:
-                    from licensing.license_menu import enter_license_key
+                    from license_system.license_menu import enter_license_key
                     return enter_license_key()
                 else:
                     print("💡 You can manage your license from the main menu (option 6)")
